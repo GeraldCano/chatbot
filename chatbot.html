@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chatbot IA - ChatGPT</title>
+    <style>
+        /* Estilos básicos para el chat */
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 0;
+        }
+
+        .chat-container {
+            max-width: 400px;
+            margin: 50px auto;
+            background-color: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .messages {
+            max-height: 400px;
+            overflow-y: auto;
+            margin-bottom: 10px;
+            padding-right: 10px;
+        }
+
+        .message {
+            margin: 10px 0;
+            padding: 8px;
+            background-color: #f1f1f1;
+            border-radius: 10px;
+        }
+
+        .user-message {
+            background-color: #cce5ff;
+            text-align: right;
+        }
+
+        .bot-message {
+            background-color: #e2e3e5;
+        }
+
+        input[type="text"] {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="chat-container">
+    <h2>Chatbot de Asistencia Legal</h2>
+    <div class="messages" id="messages"></div>
+    <input type="text" id="userInput" placeholder="Escribe tu mensaje..." onkeydown="if(event.key === 'Enter') sendMessage()">
+</div>
+
+<script>
+    const apiKey = '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';  // Sustituye con tu clave API de OpenAI
+
+    // Función para agregar mensajes al chat
+    function appendMessage(content, sender) {
+        const messagesDiv = document.getElementById('messages');
+        const messageDiv = document.createElement('div');
+        messageDiv.classList.add('message');
+        messageDiv.classList.add(sender === 'user' ? 'user-message' : 'bot-message');
+        messageDiv.textContent = content;
+        messagesDiv.appendChild(messageDiv);
+        messagesDiv.scrollTop = messagesDiv.scrollHeight;
+    }
+
+    // Función para enviar el mensaje
+    function sendMessage() {
+        const userInput = document.getElementById('userInput');
+        const message = userInput.value.trim();
+        if (message) {
+            appendMessage(message, 'user');
+            userInput.value = '';
+
+            // Llamar a la API de OpenAI para obtener la respuesta del chatbot
+            fetch('https://api.openai.com/v1/completions', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': 'Bearer ' + apiKey,
+                },
+                body: JSON.stringify({
+                    model: 'gpt-3.5-turbo',
+                    messages: [{ role: 'user', content: message }],
+                    max_tokens: 150,
+                    temperature: 0.7
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                const botMessage = data.choices[0].message.content;
+                appendMessage(botMessage, 'bot');
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                appendMessage("Lo siento, ocurrió un error al obtener la respuesta. Intenta nuevamente.", 'bot');
+            });
+        }
+    }
+</script>
+
+</body>
+</html>
